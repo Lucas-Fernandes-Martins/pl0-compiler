@@ -1,0 +1,4 @@
+VAR n, fat;
+BEGIN
+	n := 4;
+END.
