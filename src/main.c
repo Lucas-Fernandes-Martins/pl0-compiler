@@ -1,60 +1,34 @@
 #include<stdio.h>
 #include<stdlib.h>
-
-#define N_RESERVED_WORDS 11
-#define N_CONSUMABLE_CHARS 1
-#define N_OPERATORS 7
-#define N_STATES 1
-#define N_CHARS 50
-
-typedef struct {
-	int number;
-	char char_consumed;
-} State;
-
-//Moore's machine state transition output;
-typedef struct {
-	int next_state;
-	char output;
-} Output;
+#include"headers.h"
 
 
-int char_index(char type) {
-    return type - 'A';
-}
-
-int hash_function(int state, char char_consumed){
-	return state*N_STATES + char_index(char_consumed);
-}
-
-void lexical_analyser(char *string){
+void lexical_analyser(char *string, Output** transition_matrix){
 	int number = 0;
 	
 	//Initialize hash table
-	Output *hash_table = malloc(sizeof(Output)*N_STATES*N_CHARS);
+	
+	//Output output1;
+	//output1.next_state = 1;
+	//output1.output = 'a';
 
-	Output output1;
-	output1.next_state = 1;
-	output1.output = 'a';
-
-	hash_table[0] = output1;	
+	//hash_table[0] = output1;	
 	
 	int is_final_state = 0;
 	int i = 0;
 	int current_state = 0;
 	while(!is_final_state){
 		char char_consumed = string[i];
-		int hash_value = hash_function(current_state, char_consumed);
-		Output output = hash_table[hash_value];
-		printf("Current state: %d Next state: %d Output: %d\n", 
-				current_state, output.next_state, output.output);
+		Output output = transition_matrix[current_state][char_consumed];
+		printf("read: %c Current state: %d Next state: %d Output: %s\n", 
+				char_consumed, current_state, output.next_state, output.output);
 		current_state = output.next_state;
 		i += 1;
 	}	
 }
 
 
-void syntatic_analyser(char reserved_words[N_RESERVED_WORDS][10], char* file_name){
+void syntatic_analyser(char reserved_words[N_RESERVED_WORDS][10], char* file_name, char* matrix_path){
 
 	//Open file
 	FILE *f_pointer;
@@ -68,10 +42,13 @@ void syntatic_analyser(char reserved_words[N_RESERVED_WORDS][10], char* file_nam
 		printf("Error: Invalid file!\n");
 		exit(1);
 	}
+	
+	//Load transition table
+	Output **transition_matrix = csv_parser(matrix_path);
 
 	while(fgets(line, sizeof(line), f_pointer)){
 		printf("Line: %s\n", line);
-		lexical_analyser(line);
+		lexical_analyser(line, transition_matrix);
 	}
 	
 }
@@ -79,7 +56,7 @@ void syntatic_analyser(char reserved_words[N_RESERVED_WORDS][10], char* file_nam
 void main(int argc, char** argv){
 	
 	//list of reserved words
-	char reserved_words_list[N_RESERVED_WORDS][10] = {"CONST""VAR", "PROCEDURE", "BEGIN", "END", "CALL", "WHILE", "DO", "ODD", "IF", "THEN"};	
+	char reserved_words_list[N_RESERVED_WORDS][10] = {"CONST", "VAR", "PROCEDURE", "BEGIN", "END", "CALL", "WHILE", "DO", "ODD", "IF", "THEN"};	
 	char consumable_characters[N_CONSUMABLE_CHARS][10] = {" "};
 	char operators[N_OPERATORS][10] = {"+", "-", "*", "=", ">=", "<=", "=="};
 
@@ -89,11 +66,12 @@ void main(int argc, char** argv){
 	}
 
 	char *file_name = argv[1];
+	char matrix_path[] = "../data/test.csv"; 
 
 	printf("file name: %s\n", file_name);	
 	
 	printf("\n========== STARTING LEXICAL ANALYSIS! =======\n");
-	syntatic_analyser(reserved_words_list, file_name);
+	syntatic_analyser(reserved_words_list, file_name, matrix_path);
 
 
 
