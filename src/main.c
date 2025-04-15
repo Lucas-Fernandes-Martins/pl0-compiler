@@ -3,7 +3,7 @@
 #include"headers.h"
 
 
-void lexical_analyser(char *string, Output** transition_matrix){
+void lexical_analyser(FILE *f_pointer, Output** transition_matrix){
 	int number = 0;
 	
 	//Initialize hash table
@@ -18,7 +18,7 @@ void lexical_analyser(char *string, Output** transition_matrix){
 	int i = 0;
 	int current_state = 0;
 	while(!is_final_state){
-		char char_consumed = string[i];
+		char char_consumed = fgetc(f_pointer);
 		Output output = transition_matrix[current_state][char_consumed];
 		printf("read: %c Current state: %d Next state: %d Output: %s\n", 
 				char_consumed, current_state, output.next_state, output.output);
@@ -42,14 +42,14 @@ void syntatic_analyser(char reserved_words[N_RESERVED_WORDS][10], char* file_nam
 		printf("Error: Invalid file!\n");
 		exit(1);
 	}
-	
 	//Load transition table
 	Output **transition_matrix = csv_parser(matrix_path);
+	lexical_analyser(f_pointer, transition_matrix);
 
-	while(fgets(line, sizeof(line), f_pointer)){
-		printf("Line: %s\n", line);
-		lexical_analyser(line, transition_matrix);
-	}
+	//while(fgets(line, sizeof(line), f_pointer)){
+	//	printf("Line: %s\n", line);
+	//	lexical_analyser(line, transition_matrix);
+	//}
 	
 }
 
