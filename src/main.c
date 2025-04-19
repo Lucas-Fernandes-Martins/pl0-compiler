@@ -17,8 +17,8 @@ void lexical_analyser(FILE *f_pointer, Output** transition_matrix){
 	int is_final_state = 0;
 	int i = 0;
 	int current_state = 0;
-	while(!is_final_state){
-		char char_consumed = fgetc(f_pointer);
+	char char_consumed;
+	while((char_consumed = fgetc(f_pointer)) != EOF){
 		Output output = transition_matrix[current_state][char_consumed];
 		printf("read: %c Current state: %d Next state: %d Output: %s\n", 
 				char_consumed, current_state, output.next_state, output.output);
