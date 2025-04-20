@@ -20,3 +20,7 @@ typedef struct {
 int hash_function(int current_state, char symbol);
 
 Output** csv_parser(char* file_name);
+
+int check_op(char c);
+
+int is_letter(char c, Output* transition_line); 

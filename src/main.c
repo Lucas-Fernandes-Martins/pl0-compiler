@@ -19,6 +19,8 @@ void lexical_analyser(FILE *f_pointer, Output** transition_matrix){
 	int current_state = 0;
 	char char_consumed;
 	while((char_consumed = fgetc(f_pointer)) != EOF){
+		if(check_op(char_consumed)) char_consumed = '^';
+		if(is_letter(char_consumed, transition_matrix[current_state])) char_consumed = '?';
 		Output output = transition_matrix[current_state][char_consumed];
 		printf("read: %c Current state: %d Next state: %d Output: %s\n", 
 				char_consumed, current_state, output.next_state, output.output);
@@ -66,7 +68,7 @@ void main(int argc, char** argv){
 	}
 
 	char *file_name = argv[1];
-	char matrix_path[] = "../data/test.csv"; 
+	char matrix_path[] = "../data/var.csv"; 
 
 	printf("file name: %s\n", file_name);	
 	

@@ -13,7 +13,13 @@ Output** csv_parser(char* file_name){
 	
 	//allocate memory for transition matrix
 	for(int i = 0; i < NBR_STATES; i++){		
-		transition_matrix[i] = malloc(NBR_CHARS*sizeof(Output));
+		transition_matrix[i] = calloc(NBR_CHARS,sizeof(Output));
+		//populate positions
+		for(int j = 0; j < NBR_CHARS; j++){
+			Output not_implemented;
+			not_implemented.output = "NOP";
+			transition_matrix[i][j] = not_implemented;
+		}
 	}
 
 	char line[100];

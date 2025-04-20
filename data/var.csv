@@ -1,0 +1,12 @@
+state,symbol,next_state,output
+4,?,4,?
+4,-,5,ident
+4,/,5,ident
+1,A,2,A
+3,?,4,?
+0,V,1,V
+4,+,5,ident
+4,*,5,ident
+3,^,6,VAR
+2,R,3,R
+4, ,5,ident
