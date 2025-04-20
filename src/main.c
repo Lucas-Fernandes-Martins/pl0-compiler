@@ -1,9 +1,10 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h>
 #include"headers.h"
 
 
-void lexical_analyser(FILE *f_pointer, Output** transition_matrix){
+LexicalOutput lexical_analyser(FILE *f_pointer, Output** transition_matrix){
 	int number = 0;
 	
 	//Initialize hash table
@@ -18,15 +19,36 @@ void lexical_analyser(FILE *f_pointer, Output** transition_matrix){
 	int i = 0;
 	int current_state = 0;
 	char char_consumed;
+	char capture_output[100];
 	while((char_consumed = fgetc(f_pointer)) != EOF){
-		if(check_op(char_consumed)) char_consumed = '^';
+		//save input
+		char original_char = char_consumed;
+		if(check_op(char_consumed)){
+			char_consumed = '^';
+			//capture_output[i++] = '\0';
+		}else{
+			capture_output[i++] = char_consumed;
+		}
 		if(is_letter(char_consumed, transition_matrix[current_state])) char_consumed = '?';
 		Output output = transition_matrix[current_state][char_consumed];
-		printf("read: %c Current state: %d Next state: %d Output: %s\n", 
-				char_consumed, current_state, output.next_state, output.output);
+		//printf("read: %c Current state: %d Next state: %d Output: %s\n", 
+		//			char_consumed, current_state, output.next_state, output.output);
+			
 		current_state = output.next_state;
-		i += 1;
-	}	
+		if(strlen(output.output) > 2){
+			//ungetc(original_char, f_pointer);
+			LexicalOutput lexical_output;
+			strcpy(lexical_output.entity, output.output);
+			capture_output[i] = '\0';
+			strcpy(lexical_output.value, capture_output);
+			lexical_output.end = 0;	
+			return lexical_output;
+		}
+	}
+	
+	LexicalOutput end_output;
+	end_output.end = 1;
+	return end_output;
 }
 
 
@@ -46,7 +68,19 @@ void syntatic_analyser(char reserved_words[N_RESERVED_WORDS][10], char* file_nam
 	}
 	//Load transition table
 	Output **transition_matrix = csv_parser(matrix_path);
-	lexical_analyser(f_pointer, transition_matrix);
+	
+	int i = 0;
+	while(1){
+		if(i++ == -10){
+			break;
+		}
+		LexicalOutput lexical_output = lexical_analyser(f_pointer, transition_matrix);
+		if(lexical_output.end){
+			printf("END OF FILE REACHED!\n");
+			break;
+		}
+		printf("<%s> : <%s> \n", lexical_output.entity, lexical_output.value);
+	}
 
 	//while(fgets(line, sizeof(line), f_pointer)){
 	//	printf("Line: %s\n", line);

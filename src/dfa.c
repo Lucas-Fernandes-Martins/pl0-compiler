@@ -37,8 +37,8 @@ Output** csv_parser(char* file_name){
 		int next_state = atoi(strtok(NULL, ","));
 		char *output = strtok(NULL, ",");
 		//int hash_key = hash_function(current_state, symbol);
-		printf("cs: %d sy: %c ns: %d o: %s \n",
-		       current_state, symbol, next_state, output);
+		//printf("cs: %d sy: %c ns: %d o: %s \n",
+		//       current_state, symbol, next_state, output);
 		Output new_output;
 		new_output.next_state = next_state;
 		new_output.output = strdup(output);
@@ -47,11 +47,11 @@ Output** csv_parser(char* file_name){
 		lines_read += 1;
 	}
 
-	printf("hash elements: \n");
-	Output output = transition_matrix[0]['V'];
-	printf("state 0 read V -> next state: %d output: %si\n", output.next_state, output.output);
-	Output output2 = transition_matrix[1]['A'];
-	printf("state 1 read A -> next state: %d output: %si\n", output2.next_state, output2.output);
+	//printf("hash elements: \n");
+	//Output output = transition_matrix[0]['V'];
+	//printf("state 0 read V -> next state: %d output: %si\n", output.next_state, output.output);
+	//Output output2 = transition_matrix[1]['A'];
+	//printf("state 1 read A -> next state: %d output: %si\n", output2.next_state, output2.output);
 
 
 	return transition_matrix;

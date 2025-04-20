@@ -17,6 +17,12 @@ typedef struct {
         char* output;
 } Output;
 
+typedef struct {
+	char entity[100];
+	char value[100];
+	int end;
+} LexicalOutput;
+
 int hash_function(int current_state, char symbol);
 
 Output** csv_parser(char* file_name);

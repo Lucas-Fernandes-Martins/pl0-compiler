@@ -3,7 +3,7 @@
 #include"headers.h"
 
 int check_op(char c){
-	return (c == ' ' || c == '+' || c == '-' || c == '*' || c == '/');
+	return (c == ' ' || c == '+' || c == '-' || c == '*' || c == '/' || c == ',' || c == ';' || c == '\n' || c == '	');
 }
 
 int is_letter(char c, Output *transition_line){
