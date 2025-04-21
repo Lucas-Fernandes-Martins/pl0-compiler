@@ -5,7 +5,7 @@ test_1:
 	./main ../data/ex1
 
 test_2:
-	./main ../data/1.txt
+	./main ../data/ex2
 
 test_csv_parsing:
 	gcc -o dfa dfa.c headers.h

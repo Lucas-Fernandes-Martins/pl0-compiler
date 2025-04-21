@@ -17,12 +17,8 @@ void apply_specific_rules(char *symbol, Output output, Output* transition_vector
 	}else if(!strcmp(symbol, "letra")){
 		//upper case
 		for(int i = 0; i <= 255; i++){
-			if(isalnum(i)) transition_vector[i] = output;
-		}
-		//lower case
-		for(int i = 97; i <= 122; i++){
-			transition_vector[i] = output;
-		}
+			if(isalpha(i)) transition_vector[i] = output;
+		}	
 	}else if(!strcmp(symbol, "outro_=")){
 		for(int i = 0; i <= 255; i++){
 			if(i == 61) continue;
@@ -72,7 +68,7 @@ Output** csv_parser(char* file_name){
 		//populate positions
 		for(int j = 0; j < NBR_CHARS; j++){
 			Output not_implemented;
-			not_implemented.output = "NOP";
+			not_implemented.output = "LEXICAL ERROR, NOT RECOGNIZED:";
 			transition_matrix[i][j] = not_implemented;
 		}
 	}

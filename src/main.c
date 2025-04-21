@@ -36,7 +36,8 @@ LexicalOutput lexical_analyser(FILE *f_pointer, Output** transition_matrix){
 			
 		current_state = output.next_state;
 		if(output.is_final){
-			if(!strcmp(output.output, " identifier") || !strcmp(output.output, " numero")){
+
+			if(!strcmp(output.output, " identifier") || !strcmp(output.output, "numero")){
 				capture_output[i] = '\0';
 				ungetc(original_char, f_pointer);
 			}else{
@@ -88,21 +89,27 @@ void syntatic_analyser(char reserved_words[N_RESERVED_WORDS][10], char* file_nam
 	
 	int i = 0;
 	while(1){
-		if(i++ == -10){
+		
+		LexicalOutput lexical_output = lexical_analyser(f_pointer, transition_matrix);
+		
+		if(lexical_output.end){
+			printf("END OF FILE REACHED!\n");
 			break;
 		}
-		LexicalOutput lexical_output = lexical_analyser(f_pointer, transition_matrix);
 
-		//check if identifier is reserved word
+
+	
+		//check if we want to print the output
+		if(lexical_output.entity[0] == '!') continue;
+		
+		//check if identifier is reserved word		
+		
 		if(check_if_reserved_word(lexical_output.value, reserved_words)){
 			printf("<%s> : <%s> \n", lexical_output.value, lexical_output.value);
 		}else{
 			printf("<%s> : <%s> \n", lexical_output.entity, lexical_output.value);
 		}
-		if(lexical_output.end){
-			printf("END OF FILE REACHED!\n");
-			break;
-		}
+		
 	}
 
 	//while(fgets(line, sizeof(line), f_pointer)){
