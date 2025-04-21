@@ -1,10 +1,65 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<ctype.h>
 #include"headers.h"
 
 int hash_function(int state, char char_consumed){
 	return state*1000 + char_consumed - 'A';
+}
+
+void apply_specific_rules(char *symbol, Output output, Output* transition_vector){
+	
+	if(!strcmp(symbol, "dígito")){
+		for(int i = 48; i <= 57; i++){
+			transition_vector[i] = output;
+		}	
+	}else if(!strcmp(symbol, "letra")){
+		//upper case
+		for(int i = 0; i <= 255; i++){
+			if(isalnum(i)) transition_vector[i] = output;
+		}
+		//lower case
+		for(int i = 97; i <= 122; i++){
+			transition_vector[i] = output;
+		}
+	}else if(!strcmp(symbol, "outro_=")){
+		for(int i = 0; i <= 255; i++){
+			if(i == 61) continue;
+			transition_vector[i] = output;
+		}
+	}else if(!strcmp(symbol, "outro_}")){
+		for(int i = 0; i <= 255; i++){
+			if(i == 125) continue;
+			transition_vector[i] = output;
+		}
+	}else if(!strcmp(symbol, "nao_digito")){
+		for(int i = 0; i <= 255; i++){
+			if(i >= 48 && i <= 57) continue;
+			transition_vector[i] = output;
+		}
+	}else if(!strcmp(symbol, "outro")){
+		
+		for (int i = 0; i <= 255; i++) {
+        		if (isalnum(i)){
+            			continue;
+        		}
+       		 transition_vector[i] = output;
+    		}
+	}
+}
+
+char* sanitize_symbol(char* symbol){
+	if(!strcmp(symbol, "virgula")){
+		return ",";
+	}else if(!strcmp(symbol, "line_break")){
+		return "\n";
+	}else if(!strcmp(symbol, "tab")){
+		return  "	";
+	}else{
+		return symbol;
+	}
+
 }
 
 Output** csv_parser(char* file_name){
@@ -30,20 +85,38 @@ Output** csv_parser(char* file_name){
 	int lines_read = 0;
 	while(fgets(line, sizeof(line), file_p)){
 		if(lines_read++ == 0) continue; //discard csv header
-		printf("Line: %s\n", line);
+		//printf("Line: %s\n", line);
 
 		int current_state = atoi(strtok(line, ","));
-		char symbol = strtok(NULL, ",")[0];
+		char *symbol = strtok(NULL, ",");
+		symbol = sanitize_symbol(symbol);
+		if(!strcmp(symbol, "virgula")){
+			symbol = ",";
+		}else if(!strcmp(symbol, "line_break")){
+			symbol = "\n";
+		}else if(!strcmp(symbol, "tab")){
+			symbol = "	";
+		}
 		int next_state = atoi(strtok(NULL, ","));
 		char *output = strtok(NULL, ",");
+
+		int is_final = atoi(strtok(NULL, ","));
 		//int hash_key = hash_function(current_state, symbol);
-		//printf("cs: %d sy: %c ns: %d o: %s \n",
+		//printf("cs: %d sy: %s ns: %d o: %s \n",
 		//       current_state, symbol, next_state, output);
 		Output new_output;
 		new_output.next_state = next_state;
+		new_output.is_final = is_final;
 		new_output.output = strdup(output);
-		transition_matrix[current_state][symbol] = new_output;
-		printf("stored: %d | %s", transition_matrix[current_state][symbol].next_state, transition_matrix[current_state][symbol].output);
+		if(strlen(symbol) == 1){
+			transition_matrix[current_state][symbol[0]] = new_output;
+			//printf("stored: %d | %s\n", transition_matrix[current_state][symbol[0]].next_state, transition_matrix[current_state][symbol[0]].output);
+		}else{
+			apply_specific_rules(symbol, new_output, transition_matrix[current_state]);			
+			//printf("specific rule!\n");
+		}
+
+		//printf("stored: %d | %s", transition_matrix[current_state][symbol].next_state, transition_matrix[current_state][symbol].output);
 		lines_read += 1;
 	}
 

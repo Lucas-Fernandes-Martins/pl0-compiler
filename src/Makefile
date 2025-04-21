@@ -12,5 +12,5 @@ test_csv_parsing:
 	./dfa ../data/var.csv
 
 parse:
-	python3 parser.py ../state_machines/var.jff > ../data/var.csv
+	python3 parser.py ../state_machines/automata_compiler.jff > ../data/var.csv
 		

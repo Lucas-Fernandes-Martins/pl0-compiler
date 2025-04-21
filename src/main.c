@@ -23,32 +23,49 @@ LexicalOutput lexical_analyser(FILE *f_pointer, Output** transition_matrix){
 	while((char_consumed = fgetc(f_pointer)) != EOF){
 		//save input
 		char original_char = char_consumed;
-		if(check_op(char_consumed)){
-			char_consumed = '^';
+		//if(check_op(char_consumed)){
+		//	char_consumed = '^';
 			//capture_output[i++] = '\0';
-		}else{
-			capture_output[i++] = char_consumed;
-		}
-		if(is_letter(char_consumed, transition_matrix[current_state])) char_consumed = '?';
+		//}else{
+		capture_output[i] = char_consumed;
+		//}
+		//if(is_letter(char_consumed, transition_matrix[current_state])) char_consumed = '?';
 		Output output = transition_matrix[current_state][char_consumed];
 		//printf("read: %c Current state: %d Next state: %d Output: %s\n", 
 		//			char_consumed, current_state, output.next_state, output.output);
 			
 		current_state = output.next_state;
-		if(strlen(output.output) > 2){
-			//ungetc(original_char, f_pointer);
+		if(output.is_final){
+			if(!strcmp(output.output, " identifier") || !strcmp(output.output, " numero")){
+				capture_output[i] = '\0';
+				ungetc(original_char, f_pointer);
+			}else{
+				capture_output[++i] = '\0';
+			}
 			LexicalOutput lexical_output;
 			strcpy(lexical_output.entity, output.output);
-			capture_output[i] = '\0';
 			strcpy(lexical_output.value, capture_output);
 			lexical_output.end = 0;	
 			return lexical_output;
 		}
+
+		i++;
 	}
 	
 	LexicalOutput end_output;
 	end_output.end = 1;
 	return end_output;
+}
+
+
+int check_if_reserved_word(char *word, char reserved_words[N_RESERVED_WORDS][10]){
+	
+	for(int i = 0; i < N_RESERVED_WORDS; i++){
+		if(!strcmp(word, reserved_words[i])) return 1;
+	}
+
+	return 0;
+
 }
 
 
@@ -75,11 +92,17 @@ void syntatic_analyser(char reserved_words[N_RESERVED_WORDS][10], char* file_nam
 			break;
 		}
 		LexicalOutput lexical_output = lexical_analyser(f_pointer, transition_matrix);
+
+		//check if identifier is reserved word
+		if(check_if_reserved_word(lexical_output.value, reserved_words)){
+			printf("<%s> : <%s> \n", lexical_output.value, lexical_output.value);
+		}else{
+			printf("<%s> : <%s> \n", lexical_output.entity, lexical_output.value);
+		}
 		if(lexical_output.end){
 			printf("END OF FILE REACHED!\n");
 			break;
 		}
-		printf("<%s> : <%s> \n", lexical_output.entity, lexical_output.value);
 	}
 
 	//while(fgets(line, sizeof(line), f_pointer)){

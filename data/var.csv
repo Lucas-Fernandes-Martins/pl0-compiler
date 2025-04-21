@@ -1,12 +1,33 @@
-state,symbol,next_state,output
-4,?,4,?
-4,-,5,ident
-4,/,5,ident
-1,A,2,A
-3,?,4,?
-0,V,1,V
-4,+,5,ident
-4,*,5,ident
-3,^,6,VAR
-2,R,3,R
-4, ,5,ident
+state,symbol,next_state,output,is_final
+5,letra,5,letra,0
+5,dígito,5,dígito,0
+8,dígito,8,dígito,0
+0,-,19,-, simb_menos,1
+0,line_break,0,line_break,1
+0,tab,0,tab,1
+12,=,13,=, simb_maior_igual,1
+29,outro_},29,outro,0
+23,=,24,simb_atribuicao,1
+8,nao_digito,10,numero,1
+0,;,16,simb_ponto_virgula,1
+0,inválido,20,<ERRO LEX>,1
+0,<,3,<,0
+0,:,23,:,0
+3,outro_=,4,simb_menor_que,1
+3,>,11,>, simb_diferente,1
+29,},30,},1
+5,outro,6, identifier,1
+0,{,29,{,0
+0,.,1,simb_ponto,1
+0,dígito,8,dígito,0
+0,virgula,15,simb_virgula,1
+0, ,0,space,1
+0,+,18,+, simb_mais,1
+3,=,7,=, simb_menor_igual,1
+0,>,12,>,0
+0,/,22,/, simb_div,1
+0,=,2,=, simb_igual,1
+0,*,21,*, simb_mult,1
+12,outro_=,14,simb_maior_que,1
+23,outro_=,25,<ERRO CARAC>,1
+0,letra,5,letra,0
