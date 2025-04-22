@@ -13,4 +13,10 @@ test_csv_parsing:
 
 parse:
 	python3 parser.py ../state_machines/automata_compiler.jff > ../data/var.csv
+
+main:
+	gcc -o main main.c dfa.c utils.c
+
+run:	main
+	./main  $(FILE_PATH)
 		
