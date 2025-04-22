@@ -31,7 +31,7 @@ void apply_specific_rules(char *symbol, Output output, Output* transition_vector
 		}
 	}else if(!strcmp(symbol, "nao_digito")){
 		for(int i = 0; i <= 255; i++){
-			if(i >= 48 && i <= 57) continue;
+			if(isdigit(i)) continue;
 			transition_vector[i] = output;
 		}
 	}else if(!strcmp(symbol, "outro")){

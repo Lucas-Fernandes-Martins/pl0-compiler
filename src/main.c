@@ -37,7 +37,7 @@ LexicalOutput lexical_analyser(FILE *f_pointer, Output** transition_matrix){
 		current_state = output.next_state;
 		if(output.is_final){
 
-			if(!strcmp(output.output, " identifier") || !strcmp(output.output, "numero")){
+			if(!strcmp(output.output, "identifier") || !strcmp(output.output, "numero")){
 				capture_output[i] = '\0';
 				ungetc(original_char, f_pointer);
 			}else{
@@ -105,9 +105,9 @@ void syntatic_analyser(char reserved_words[N_RESERVED_WORDS][10], char* file_nam
 		//check if identifier is reserved word		
 		
 		if(check_if_reserved_word(lexical_output.value, reserved_words)){
-			printf("<%s> : <%s> \n", lexical_output.value, lexical_output.value);
+			printf("%s , %s \n", lexical_output.value, lexical_output.value);
 		}else{
-			printf("<%s> : <%s> \n", lexical_output.entity, lexical_output.value);
+			printf("%s , %s \n", lexical_output.entity, lexical_output.value);
 		}
 		
 	}

@@ -1,0 +1,4 @@
+VAR END 1+1 ger@ 2n 1@  fat;
+BEGIN
+	n := 4;
+END.
