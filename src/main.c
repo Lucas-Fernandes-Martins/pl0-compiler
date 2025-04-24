@@ -132,7 +132,7 @@ void main(int argc, char** argv){
 	}
 
 	char *file_name = argv[1];
-	char matrix_path[] = "../data/var.csv"; 
+	char matrix_path[] = "./data/var.csv"; 
 
 	printf("file name: %s\n", file_name);	
 	
