@@ -30,7 +30,18 @@ To build and run this project, you will need:
 
 ## Building the Project
 
-To compile the lexical analyzer, simply run `make` in the project's root directory:
+To compile and run the lexical analyzer, simply run `make` in the project's root directory:
 
 ```bash
-make
+make run FILE_PATH=your_file_path
+
+```
+
+Files ./data/ex1, ./data/ex2 are offered as examples
+
+```bash
+make run FILE_PATH=./data/ex1
+
+
+
+
