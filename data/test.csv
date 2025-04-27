@@ -1,7 +1,0 @@
-state,symbol,next_state,output
-0,V,1,V
-1,A,2,A
-2,R,0,var identified
-0,E,3,B
-3,N,4,N
-4,D,5,end identified
