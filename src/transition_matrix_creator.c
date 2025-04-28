@@ -9,6 +9,7 @@ void apply_specific_rules(char *symbol, Transition new_transition, Transition* t
 		for(int i = 48; i <= 57; i++){
 			new_transition.output = malloc(sizeof(char) * 2);
 			sprintf(new_transition.output, "%c", i);
+			free(transition_vector[i].output);
 			transition_vector[i] = new_transition;
 		}	
 	}else if(!strcmp(symbol, "letra")){
@@ -16,6 +17,7 @@ void apply_specific_rules(char *symbol, Transition new_transition, Transition* t
 			if(isalpha(i)){
 				new_transition.output = malloc(sizeof(char) * 2);
 				sprintf(new_transition.output, "%c", i);
+				free(transition_vector[i].output);
 				transition_vector[i] = new_transition;
 			}
 		}	
@@ -24,6 +26,7 @@ void apply_specific_rules(char *symbol, Transition new_transition, Transition* t
 		new_transition.lookahead = 1;
 		for(int i = 0; i <= 255; i++){
 			if(isdigit(i)) continue;
+			free(transition_vector[i].output);
 			transition_vector[i] = new_transition;
 		}
 	}else if(!strcmp(symbol, "outro")){
@@ -31,6 +34,7 @@ void apply_specific_rules(char *symbol, Transition new_transition, Transition* t
 		new_transition.lookahead = 1;
 		for (int i = 0; i <= 255; i++){
 			if (isalnum(i)) continue;
+			free(transition_vector[i].output);
 			transition_vector[i] = new_transition;
 		}
 	}else if(!strcmp(symbol, "outro_:=")){
@@ -38,6 +42,7 @@ void apply_specific_rules(char *symbol, Transition new_transition, Transition* t
 		new_transition.lookahead = 1;
 		for(int i = 0; i <= 255; i++){
 			if(i == '=') continue;
+			free(transition_vector[i].output);
 			transition_vector[i] = new_transition;
 		}
 	}else if(!strcmp(symbol, "outro_=")){
@@ -45,6 +50,7 @@ void apply_specific_rules(char *symbol, Transition new_transition, Transition* t
 		new_transition.lookahead = 1;
 		for(int i = 0; i <= 255; i++){
 			if(i == '=') continue;
+			free(transition_vector[i].output);
 			transition_vector[i] = new_transition;
 		}
 	}else if(!strcmp(symbol, "outro_>_=")){
@@ -52,12 +58,14 @@ void apply_specific_rules(char *symbol, Transition new_transition, Transition* t
 		new_transition.lookahead = 1;
 		for(int i = 0; i <= 255; i++){
 			if(i == '=' || i == '>') continue;
+			free(transition_vector[i].output);
 			transition_vector[i] = new_transition;
 		}
 	}else if(!strcmp(symbol, "outro_}")){
 		new_transition.output = "\0";
 		for(int i = 0; i <= 255; i++){
 			if(i == '}' || i == '\n') continue;
+			free(transition_vector[i].output);
 			transition_vector[i] = new_transition;
 		}
 	}
@@ -95,15 +103,16 @@ Transition** csv_parser(char* file_name){
 	int number_transitions = atoi(strtok(NULL, ","));
 
 	// create and allocate memory for the transition matrix
-	Transition** transition_matrix = malloc(number_transitions * sizeof(Transition*));
+	Transition** transition_matrix = malloc(number_states * sizeof(Transition*));
 	
-	for(int i = 0; i < number_transitions; i++){		
+	for(int i = 0; i < number_states; i++){		
 		transition_matrix[i] = calloc(ASCII_EXTENDED_SIZE, sizeof(Transition));
 
 		// populate positions
 		for(int j = 0; j < ASCII_EXTENDED_SIZE; j++){
 			Transition not_implemented;
-			not_implemented.next_state.number = -1;
+			not_implemented.next_state.number = 0;
+			not_implemented.next_state.is_final = 1;
 			not_implemented.lookahead = 0;
 			not_implemented.num_outputs = 2;
 			sprintf(buffer, "%c <ERRO_CARACTERE_INVALIDO>", (char) j);
@@ -143,21 +152,13 @@ Transition** csv_parser(char* file_name){
 
 		if(strlen(symbol) == 1){
 			new_transition.output = strdup(output);
+			free(transition_matrix[current_state][symbol[0]].output);
 			transition_matrix[current_state][symbol[0]] = new_transition;
 		}
 		else{
 			apply_specific_rules(symbol, new_transition, transition_matrix[current_state]);	
 		}
 	}		
-
-	// in case you wanna try the transition_matrix
-	int i = 0;
-	int j = 64;
-	printf("transition_matrix[%d][%d].output:%s\n", i, j, transition_matrix[i][j].output);
-	printf("transition_matrix[%d][%d].next_state.number:%d\n", i, j, transition_matrix[i][j].next_state.number);
-	printf("transition_matrix[%d][%d].next_state.is_final:%d\n", i, j, transition_matrix[i][j].next_state.is_final);
-	printf("transition_matrix[%d][%d].num_outputs:%d\n", i, j, transition_matrix[i][j].num_outputs);
-	printf("transition_matrix[%d][%d].lookahead:%d\n\n", i, j, transition_matrix[i][j].lookahead);
 
 	return transition_matrix;
 }

@@ -8,6 +8,13 @@ static const char reserved_words[NUM_RESERVED_WORDS][MAX_RESERVED_WORD_LENGHT] =
     "CALL", "WHILE", "DO", "ODD", "IF", "THEN"
 };
 
+int check_if_reserved_word(char *word){
+	for(int i = 0; i < NUM_RESERVED_WORDS; i++)
+		if(!strcmp(word, reserved_words[i])) return 1;
+	
+	return 0;
+}
+
 LexicalOutput lexical_analyser(FILE *f_pointer, Transition** transition_matrix){
 	State current_state;
 	current_state.number = 0;
@@ -29,11 +36,16 @@ LexicalOutput lexical_analyser(FILE *f_pointer, Transition** transition_matrix){
 		if(current_transition.next_state.is_final){
 			switch(current_transition.num_outputs){
 				case 1:
-					strcpy(lexical_output.class, current_transition.output);
+					if(check_if_reserved_word(capture_output)) strcpy(lexical_output.class, capture_output);
+					else strcpy(lexical_output.class, current_transition.output);
 					break;
 				case 2:
-					snprintf(capture_output + strlen(capture_output), sizeof(capture_output) - strlen(capture_output), "%s", strtok(current_transition.output, " "));
-					strcpy(lexical_output.class, strtok(NULL, " "));
+					char *temp = malloc(MAX_TOKEN_LENGHT * sizeof(char));
+					strcpy(temp, current_transition.output);
+					char* temptemp = strsep(&temp, " ");
+					strcat(capture_output, temptemp);
+					strcpy(lexical_output.class, temp);
+					free(temptemp);
 					break;
 				default:
 					printf("None or excessive number of outputs in Mealy machine!\n");
@@ -42,72 +54,30 @@ LexicalOutput lexical_analyser(FILE *f_pointer, Transition** transition_matrix){
 
 			strcpy(lexical_output.token, capture_output);
 
-			if(current_transition.lookahead){
-				fseek(f_pointer, -1, SEEK_CUR);
-			}
-			
+			if(current_transition.lookahead) fseek(f_pointer, -1, SEEK_CUR);
 
 			return lexical_output;
 		} 
 		else{
-			snprintf(capture_output + strlen(capture_output), sizeof(capture_output) - strlen(capture_output), "%s", current_transition.output);
+			strcat(capture_output, current_transition.output);
 		}
+			
 		
 		current_state = current_transition.next_state;
-
-		/*
-		
-
-		lexical_output.token[i] = current_transition.output[0];
-		current_state = current_transition.next_state;
-
-		
-		
-			//check if identifier is reserved word		
-			if(check_if_reserved_word(lexical_output.value)){
-				printf("%s , %s \n", lexical_output.value, lexical_output.value);
-			}else{
-				printf("%s , %s \n", lexical_output.value, lexical_output.entity);
-			}
-
-			if(!strcmp(output.output, "identificador") || !strcmp(output.output, "numero")){
-				capture_output[i] = '\0';
-				ungetc(original_char, f_pointer);
-			}else{
-				if(capture_output[i] == ' ' || capture_output[i] == '\n' || capture_output[i] == '\t') capture_output[i] = '\0';
-				else capture_output[++i] = '\0';
-			}
-			LexicalOutput lexical_output;
-			strcpy(lexical_output.entity, output.output);
-			strcpy(lexical_output.value, capture_output);
-			lexical_output.end = 0;	
-			return lexical_output;
-		} else{
-			strcat(capture_output, output.output);
-		}
-
-		*/
 	}
 
 	lexical_output.end = 1;
 	return lexical_output;
 }
 
-
-int check_if_reserved_word(char *word){
-	for(int i = 0; i < NUM_RESERVED_WORDS; i++){
-		if(!strcmp(word, reserved_words[i])) return 1;
-	}
-
-	return 0;
-
-}
-
-
 void syntatic_analyser(char* file_name, char* matrix_path){
 	//Open file
 	FILE *f_pointer;
 	f_pointer = fopen(file_name, "r");
+
+	// Output file
+	FILE *file;
+	file = fopen("output.txt", "w");
 
 	if(f_pointer == NULL){
 		printf("Error: Invalid file!\n");
@@ -122,10 +92,26 @@ void syntatic_analyser(char* file_name, char* matrix_path){
 		
 		if(lexical_output.end){
 			printf("\n========== END OF FILE REACHED! ========= \n");
+
+			// possible to free the memory 
+			
+			for(int i = 0; i < 27; i++) {
+				/*
+				for(int j = 0; j < ASCII_EXTENDED_SIZE; j++) {
+					
+					if(!strcmp(transition_matrix[i][j].output, "numero") && !strcmp(transition_matrix[i][j].output, "identificador") && !strcmp(transition_matrix[i][j].output, "<ERRO_SIMBOLO_INCOMPLETO>") && !strcmp(transition_matrix[i][j].output, "simb_maior_que") && !strcmp(transition_matrix[i][j].output, "simb_menor_que") && !strcmp(transition_matrix[i][j].output, "\0"))
+						free(transition_matrix[i][j].output);
+				}
+				*/
+				free(transition_matrix[i]);
+			}
+			
+			free(transition_matrix);
+			
 			break;
 		}
 
-		if(strlen(lexical_output.token) > 0) printf("%s, %s \n", lexical_output.token, lexical_output.class);
+		if(strlen(lexical_output.token) > 0) fprintf(file, "%s, %s \n", lexical_output.token, lexical_output.class);
 	}
 }
 
