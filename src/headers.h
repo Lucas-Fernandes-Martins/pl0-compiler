@@ -1,33 +1,26 @@
-#include<stdio.h>
+#include <stdio.h>
 
-#define N_RESERVED_WORDS 11
-#define N_CONSUMABLE_CHARS 1
-#define N_OPERATORS 7
-#define NBR_STATES 50
-#define NBR_CHARS 256
+#define NUM_RESERVED_WORDS 11
+#define MAX_RESERVED_WORD_LENGHT 10
+#define ASCII_EXTENDED_SIZE 256
 
+// Mealy's machine state
 typedef struct {
         int number;
-        char char_consumed;
+        int is_final;
 } State;
 
-//Mealy's machine state transition output;
+// Mealy's machine transition;
 typedef struct {
-        int next_state;
-	int is_final;
+        char char_consumed;
         char* output;
-} Output;
+        State next_state;
+} Transition;
 
 typedef struct {
-	char entity[100];
-	char value[100];
+	char token[128];
+	char class[128];
 	int end;
 } LexicalOutput;
 
-int hash_function(int current_state, char symbol);
-
-Output** csv_parser(char* file_name);
-
-int check_op(char c);
-
-int is_letter(char c, Output* transition_line); 
+Transition** csv_parser(char* file_name);
