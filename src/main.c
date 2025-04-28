@@ -14,10 +14,10 @@ LexicalOutput lexical_analyser(FILE *f_pointer, Transition** transition_matrix){
 	current_state.is_final = 0;
 
 	LexicalOutput lexical_output;
+	lexical_output.end = 0;
 
-	int i = 0;
 	char char_consumed;
-	char capture_output[128];
+	char capture_output[MAX_TOKEN_LENGHT];
 	capture_output[0] = '\0';
 
 	while((char_consumed = fgetc(f_pointer)) != EOF){
@@ -26,12 +26,37 @@ LexicalOutput lexical_analyser(FILE *f_pointer, Transition** transition_matrix){
 
 		Transition current_transition = transition_matrix[current_state.number][char_consumed];
 
-		printf("%s\n", current_transition.output);
+		if(current_transition.next_state.is_final){
+			switch(current_transition.num_outputs){
+				case 1:
+					strcpy(lexical_output.class, current_transition.output);
+					break;
+				case 2:
+					snprintf(capture_output + strlen(capture_output), sizeof(capture_output) - strlen(capture_output), "%s", strtok(current_transition.output, " "));
+					strcpy(lexical_output.class, strtok(NULL, " "));
+					break;
+				default:
+					printf("None or excessive number of outputs in Mealy machine!\n");
+					exit(-1);
+			}
+
+			strcpy(lexical_output.token, capture_output);
+
+			if(current_transition.lookahead){
+				fseek(f_pointer, -1, SEEK_CUR);
+			}
+			
+
+			return lexical_output;
+		} 
+		else{
+			snprintf(capture_output + strlen(capture_output), sizeof(capture_output) - strlen(capture_output), "%s", current_transition.output);
+		}
+		
+		current_state = current_transition.next_state;
 
 		/*
-		if(current_state.is_final == 1){
-			break;
-		}
+		
 
 		lexical_output.token[i] = current_transition.output[0];
 		current_state = current_transition.next_state;
@@ -62,9 +87,9 @@ LexicalOutput lexical_analyser(FILE *f_pointer, Transition** transition_matrix){
 		}
 
 		*/
-		i++;
 	}
-	
+
+	lexical_output.end = 1;
 	return lexical_output;
 }
 
@@ -100,7 +125,7 @@ void syntatic_analyser(char* file_name, char* matrix_path){
 			break;
 		}
 
-		// printf("%s, %s \n", lexical_output.token, lexical_output.class);
+		if(strlen(lexical_output.token) > 0) printf("%s, %s \n", lexical_output.token, lexical_output.class);
 	}
 }
 

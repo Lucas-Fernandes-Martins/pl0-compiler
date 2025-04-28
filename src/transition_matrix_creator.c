@@ -21,30 +21,35 @@ void apply_specific_rules(char *symbol, Transition new_transition, Transition* t
 		}	
 	}else if(!strcmp(symbol, "nao_digito")){
 		new_transition.output = "numero";
+		new_transition.lookahead = 1;
 		for(int i = 0; i <= 255; i++){
 			if(isdigit(i)) continue;
 			transition_vector[i] = new_transition;
 		}
 	}else if(!strcmp(symbol, "outro")){
 		new_transition.output = "identificador";
+		new_transition.lookahead = 1;
 		for (int i = 0; i <= 255; i++){
 			if (isalnum(i)) continue;
 			transition_vector[i] = new_transition;
 		}
 	}else if(!strcmp(symbol, "outro_:=")){
 		new_transition.output = "<ERRO_SIMBOLO_INCOMPLETO>";
+		new_transition.lookahead = 1;
 		for(int i = 0; i <= 255; i++){
 			if(i == '=') continue;
 			transition_vector[i] = new_transition;
 		}
 	}else if(!strcmp(symbol, "outro_=")){
 		new_transition.output = "simb_maior_que";
+		new_transition.lookahead = 1;
 		for(int i = 0; i <= 255; i++){
 			if(i == '=') continue;
 			transition_vector[i] = new_transition;
 		}
 	}else if(!strcmp(symbol, "outro_>_=")){
 		new_transition.output = "simb_menor_que";
+		new_transition.lookahead = 1;
 		for(int i = 0; i <= 255; i++){
 			if(i == '=' || i == '>') continue;
 			transition_vector[i] = new_transition;
@@ -99,6 +104,8 @@ Transition** csv_parser(char* file_name){
 		for(int j = 0; j < ASCII_EXTENDED_SIZE; j++){
 			Transition not_implemented;
 			not_implemented.next_state.number = -1;
+			not_implemented.lookahead = 0;
+			not_implemented.num_outputs = 2;
 			sprintf(buffer, "%c <ERRO_CARACTERE_INVALIDO>", (char) j);
 			not_implemented.output = strdup(buffer);
 			transition_matrix[i][j] = not_implemented;
@@ -115,6 +122,9 @@ Transition** csv_parser(char* file_name){
 		symbol = sanitize_token(symbol);
 		//printf("symbol:%s\n", symbol);
 
+		int num_outputs = atoi(strtok(NULL, ","));
+		//printf("num_outputs:%d\n", num_outputs);
+
 		char *output = strtok(NULL, ",");
 		output = sanitize_token(output);
 		//printf("output:%s\n", output);
@@ -127,6 +137,7 @@ Transition** csv_parser(char* file_name){
 
 		
 		Transition new_transition;	
+		new_transition.num_outputs = num_outputs;
 		new_transition.next_state.number = next_state;
 		new_transition.next_state.is_final = next_state_is_final;
 
@@ -139,12 +150,14 @@ Transition** csv_parser(char* file_name){
 		}
 	}		
 
-
 	// in case you wanna try the transition_matrix
 	int i = 0;
 	int j = 64;
-	printf("transition_matrix[%d][%d].output: %s\n", i, j, transition_matrix[i][j].output);
-	printf("transition_matrix[%d][%d].next_state.number: %d\n", i, j, transition_matrix[i][j].next_state.number);
+	printf("transition_matrix[%d][%d].output:%s\n", i, j, transition_matrix[i][j].output);
+	printf("transition_matrix[%d][%d].next_state.number:%d\n", i, j, transition_matrix[i][j].next_state.number);
+	printf("transition_matrix[%d][%d].next_state.is_final:%d\n", i, j, transition_matrix[i][j].next_state.is_final);
+	printf("transition_matrix[%d][%d].num_outputs:%d\n", i, j, transition_matrix[i][j].num_outputs);
+	printf("transition_matrix[%d][%d].lookahead:%d\n\n", i, j, transition_matrix[i][j].lookahead);
 
 	return transition_matrix;
 }

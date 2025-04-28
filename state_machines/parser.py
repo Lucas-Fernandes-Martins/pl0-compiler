@@ -66,7 +66,7 @@ def parse_jff_mealy(filename):
         # --- Step 2: Process transitions and print output ---
 
         # print the principal header
-        print("state,symbol,output,next_state,next_state_is_final")
+        print("state,symbol,num_outputs,outputs,next_state,next_state_is_final")
 
         # Find all transition elements and extract data
         for transition in automaton.findall('transition'):
@@ -86,6 +86,7 @@ def parse_jff_mealy(filename):
 
             # Handle case where transout might be empty tag e.g. <transout/>
             trans_out = transout_output.text if transout_output.text is not None else ""
+            num_output = trans_out.count(',') + 1
             trans_out = trans_out.replace(", ", " ")
 
             # Ensure essential text data is present (output can be empty)
@@ -97,7 +98,7 @@ def parse_jff_mealy(filename):
             is_final_value = 1 if to_id in final_state_ids else 0
 
             # Format and print the output line
-            print(f"{from_id},{read_sym},{trans_out},{to_id},{is_final_value}")
+            print(f"{from_id},{read_sym},{num_output},{trans_out},{to_id},{is_final_value}")
 
     except ET.ParseError as e:
         print(f"Error parsing XML file {filename}: {e}", file=sys.stderr)
