@@ -9,5 +9,5 @@ run:	all
 
 
 run_val:    all
-	valgrind ./main $(FILE_PATH)
+	valgrind --leak-check=full --show-leak-kinds=all ./main $(FILE_PATH)
 		

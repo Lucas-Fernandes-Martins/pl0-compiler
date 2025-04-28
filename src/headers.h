@@ -13,7 +13,6 @@ typedef struct {
 
 // Mealy's machine transition;
 typedef struct {
-        char char_consumed;
         int num_outputs;
         char* output;
         int lookahead;
@@ -26,4 +25,4 @@ typedef struct {
 	int end;
 } LexicalOutput;
 
-Transition** csv_parser(char* file_name);
+Transition** csv_parser(char* input_file_name);
