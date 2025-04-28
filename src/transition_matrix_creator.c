@@ -1,0 +1,150 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include "headers.h"
+
+void apply_specific_rules(char *symbol, Transition new_transition, Transition* transition_vector){
+	if(!strcmp(symbol, "digito")){
+		for(int i = 48; i <= 57; i++){
+			new_transition.output = malloc(sizeof(char) * 2);
+			sprintf(new_transition.output, "%c", i);
+			transition_vector[i] = new_transition;
+		}	
+	}else if(!strcmp(symbol, "letra")){
+		for(int i = 0; i <= 255; i++){
+			if(isalpha(i)){
+				new_transition.output = malloc(sizeof(char) * 2);
+				sprintf(new_transition.output, "%c", i);
+				transition_vector[i] = new_transition;
+			}
+		}	
+	}else if(!strcmp(symbol, "nao_digito")){
+		new_transition.output = "numero";
+		for(int i = 0; i <= 255; i++){
+			if(isdigit(i)) continue;
+			transition_vector[i] = new_transition;
+		}
+	}else if(!strcmp(symbol, "outro")){
+		new_transition.output = "identificador";
+		for (int i = 0; i <= 255; i++){
+			if (isalnum(i)) continue;
+			transition_vector[i] = new_transition;
+		}
+	}else if(!strcmp(symbol, "outro_:=")){
+		new_transition.output = "<ERRO_SIMBOLO_INCOMPLETO>";
+		for(int i = 0; i <= 255; i++){
+			if(i == '=') continue;
+			transition_vector[i] = new_transition;
+		}
+	}else if(!strcmp(symbol, "outro_=")){
+		new_transition.output = "simb_maior_que";
+		for(int i = 0; i <= 255; i++){
+			if(i == '=') continue;
+			transition_vector[i] = new_transition;
+		}
+	}else if(!strcmp(symbol, "outro_>_=")){
+		new_transition.output = "simb_menor_que";
+		for(int i = 0; i <= 255; i++){
+			if(i == '=' || i == '>') continue;
+			transition_vector[i] = new_transition;
+		}
+	}else if(!strcmp(symbol, "outro_}")){
+		new_transition.output = "\0";
+		for(int i = 0; i <= 255; i++){
+			if(i == '}' || i == '\n') continue;
+			transition_vector[i] = new_transition;
+		}
+	}
+}
+
+char* sanitize_token(char* symbol){
+	if(!strcmp(symbol, "virgula"))
+		return ",";
+	else if(!strcmp(symbol, "tab"))
+		return "\t";
+	else if(!strcmp(symbol, "espaco"))
+		return " ";
+	else if(!strcmp(symbol, "quebra_linha"))
+		return "\n";
+	else if(!strcmp(symbol, "lambda"))
+		return "\0";
+
+	return symbol;
+}
+
+Transition** csv_parser(char* file_name){
+	FILE* file_p = fopen(file_name, "r");
+
+	if(file_p == NULL){
+		printf("Error reading file!\n");
+		exit(0);
+	}
+
+	char line[128];
+	char buffer[128];
+
+	// get number of states and transitions from the first line
+	fgets(line, sizeof(line), file_p);
+	int number_states = atoi(strtok(line, ","));
+	int number_transitions = atoi(strtok(NULL, ","));
+
+	// create and allocate memory for the transition matrix
+	Transition** transition_matrix = malloc(number_transitions * sizeof(Transition*));
+	
+	for(int i = 0; i < number_transitions; i++){		
+		transition_matrix[i] = calloc(ASCII_EXTENDED_SIZE, sizeof(Transition));
+
+		// populate positions
+		for(int j = 0; j < ASCII_EXTENDED_SIZE; j++){
+			Transition not_implemented;
+			not_implemented.next_state.number = -1;
+			sprintf(buffer, "%c <ERRO_CARACTERE_INVALIDO>", (char) j);
+			not_implemented.output = strdup(buffer);
+			transition_matrix[i][j] = not_implemented;
+		}
+	}
+
+	fgets(line, sizeof(line), file_p); // discard csv header
+
+	while(fgets(line, sizeof(line), file_p)){
+		int current_state = atoi(strtok(line, ","));
+		//printf("current_state:%d\n", current_state);
+		
+		char *symbol = strtok(NULL, ",");
+		symbol = sanitize_token(symbol);
+		//printf("symbol:%s\n", symbol);
+
+		char *output = strtok(NULL, ",");
+		output = sanitize_token(output);
+		//printf("output:%s\n", output);
+
+		int next_state = atoi(strtok(NULL, ","));
+		//printf("next_state:%d\n", next_state);
+
+		int next_state_is_final = atoi(strtok(NULL, ","));
+		//printf("next_state_is_final:%d\n\n", next_state_is_final);
+
+		
+		Transition new_transition;	
+		new_transition.next_state.number = next_state;
+		new_transition.next_state.is_final = next_state_is_final;
+
+		if(strlen(symbol) == 1){
+			new_transition.output = strdup(output);
+			transition_matrix[current_state][symbol[0]] = new_transition;
+		}
+		else{
+			apply_specific_rules(symbol, new_transition, transition_matrix[current_state]);	
+		}
+	}		
+
+
+	// in case you wanna try the transition_matrix
+	int i = 0;
+	int j = 64;
+	printf("transition_matrix[%d][%d].output: %s\n", i, j, transition_matrix[i][j].output);
+	printf("transition_matrix[%d][%d].next_state.number: %d\n", i, j, transition_matrix[i][j].next_state.number);
+
+	return transition_matrix;
+}
