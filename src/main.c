@@ -1,103 +1,122 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include"headers.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "headers.h"
 
-LexicalOutput lexical_analyser(FILE *f_pointer, Output** transition_matrix){
-	int is_final_state = 0;
-	int i = 0;
-	int current_state = 0;
+static const char reserved_words[NUM_RESERVED_WORDS][MAX_RESERVED_WORD_LENGHT] = {
+    "CONST", "VAR", "PROCEDURE", "BEGIN", "END",
+    "CALL", "WHILE", "DO", "ODD", "IF", "THEN"
+};
+
+int check_if_reserved_word(char *word){
+	for(int i = 0; i < NUM_RESERVED_WORDS; i++)
+		if(!strcmp(word, reserved_words[i])) return 1;
+	
+	return 0;
+}
+
+LexicalOutput lexical_analyser(FILE *f_pointer, Transition** transition_matrix){
+	State current_state;
+	current_state.number = 0;
+	current_state.is_final = 0;
+
+	LexicalOutput lexical_output;
+	lexical_output.end = 0;
+
 	char char_consumed;
-	char capture_output[100];
+	char capture_output[MAX_TOKEN_LENGHT];
 	capture_output[0] = '\0';
 
 	while((char_consumed = fgetc(f_pointer)) != EOF){
 		//save input
 		char original_char = char_consumed;
 
-		Output output = transition_matrix[current_state][char_consumed];
+		Transition current_transition = transition_matrix[current_state.number][char_consumed];
 
-		current_state = output.next_state;
-		if(output.is_final){
-			if(!strcmp(output.output, "identificador") || !strcmp(output.output, "numero")){
-				capture_output[i] = '\0';
-				ungetc(original_char, f_pointer);
-			}else{
-				if(capture_output[i] == ' ' || capture_output[i] == '\n' || capture_output[i] == '\t') capture_output[i] = '\0';
-				else capture_output[++i] = '\0';
+		if(current_transition.next_state.is_final){
+			switch(current_transition.num_outputs){
+				case 1:
+					if(check_if_reserved_word(capture_output)) strcpy(lexical_output.class, capture_output);
+					else strcpy(lexical_output.class, current_transition.output);
+					break;
+				case 2:
+					char *temp = malloc(MAX_TOKEN_LENGHT * sizeof(char));
+					strcpy(temp, current_transition.output);
+					char* temptemp = strsep(&temp, " ");
+					strcat(capture_output, temptemp);
+					strcpy(lexical_output.class, temp);
+					free(temptemp);
+					break;
+				default:
+					printf("None or excessive number of outputs in Mealy machine!\n");
+					exit(-1);
 			}
-			LexicalOutput lexical_output;
-			strcpy(lexical_output.entity, output.output);
-			strcpy(lexical_output.value, capture_output);
-			lexical_output.end = 0;	
+
+			strcpy(lexical_output.token, capture_output);
+
+			if(current_transition.lookahead) fseek(f_pointer, -1, SEEK_CUR);
+
 			return lexical_output;
-		} else{
-			strcat(capture_output, output.output);
+		} 
+		else{
+			strcat(capture_output, current_transition.output);
 		}
-
-		i++;
-	}
-	
-	LexicalOutput end_output;
-	end_output.end = 1;
-	return end_output;
-}
-
-
-int check_if_reserved_word(char *word, char reserved_words[N_RESERVED_WORDS][10]){
-	for(int i = 0; i < N_RESERVED_WORDS; i++){
-		if(!strcmp(word, reserved_words[i])) return 1;
+			
+		
+		current_state = current_transition.next_state;
 	}
 
-	return 0;
-
+	lexical_output.end = 1;
+	return lexical_output;
 }
 
-
-void syntatic_analyser(char reserved_words[N_RESERVED_WORDS][10], char* file_name, char* matrix_path){
-
+void syntatic_analyser(char* file_name, char* matrix_path){
 	//Open file
 	FILE *f_pointer;
 	f_pointer = fopen(file_name, "r");
-	//we're reading line by line, need to establish
-	//max number of a line
-	int batch_size = 100;
-	char line[batch_size];
+
+	// Output file
+	FILE *file;
+	file = fopen("output.txt", "w");
 
 	if(f_pointer == NULL){
 		printf("Error: Invalid file!\n");
 		exit(1);
 	}
+
 	//Load transition table
-	Output **transition_matrix = csv_parser(matrix_path);
+	Transition **transition_matrix = csv_parser(matrix_path);
 	
-	int i = 0;
 	while(1){
-		
 		LexicalOutput lexical_output = lexical_analyser(f_pointer, transition_matrix);
 		
 		if(lexical_output.end){
 			printf("\n========== END OF FILE REACHED! ========= \n");
+
+			// possible to free the memory 
+			
+			for(int i = 0; i < 27; i++) {
+				/*
+				for(int j = 0; j < ASCII_EXTENDED_SIZE; j++) {
+					
+					if(!strcmp(transition_matrix[i][j].output, "numero") && !strcmp(transition_matrix[i][j].output, "identificador") && !strcmp(transition_matrix[i][j].output, "<ERRO_SIMBOLO_INCOMPLETO>") && !strcmp(transition_matrix[i][j].output, "simb_maior_que") && !strcmp(transition_matrix[i][j].output, "simb_menor_que") && !strcmp(transition_matrix[i][j].output, "\0"))
+						free(transition_matrix[i][j].output);
+				}
+				*/
+				free(transition_matrix[i]);
+			}
+			
+			free(transition_matrix);
+			
 			break;
 		}
 
-		//check if we want to print the output
-		if(lexical_output.entity[0] == '!') continue;
-		
-		//check if identifier is reserved word		
-		
-		if(check_if_reserved_word(lexical_output.value, reserved_words)){
-			printf("%s , %s \n", lexical_output.value, lexical_output.value);
-		}else{
-			printf("%s , %s \n", lexical_output.value, lexical_output.entity);
-		}
-		
+		if(strlen(lexical_output.token) > 0) fprintf(file, "%s, %s \n", lexical_output.token, lexical_output.class);
 	}
 }
 
 void main(int argc, char** argv){
 	// set the list of reserved words
-	char reserved_words_list[N_RESERVED_WORDS][10] = {"CONST", "VAR", "PROCEDURE", "BEGIN", "END", "CALL", "WHILE", "DO", "ODD", "IF", "THEN"};	
 
 	if(argc != 2){
 		printf("ERROR! This analyser takes one and only one argument, which is the file name!\n");
@@ -105,8 +124,10 @@ void main(int argc, char** argv){
 	}
 
 	char *file_name = argv[1];
-	char matrix_path[] = "./data/var.csv"; 
+	char matrix_path[] = "./data/transition_matrix.csv"; 
+
+	//Transition **transition_matrix = csv_parser(matrix_path);
 	
 	printf("\n========== STARTING LEXICAL ANALYSIS! ========= \n\n");
-	syntatic_analyser(reserved_words_list, file_name, matrix_path);
+	syntatic_analyser(file_name, matrix_path);
 }

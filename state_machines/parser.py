@@ -31,13 +31,27 @@ def parse_jff_mealy(filename):
             print(f"Error: <automaton> tag not found in {filename}", file=sys.stderr)
             return
 
+        # pre-header with the number of states and transitions
+        number_states = 0
+        number_transitions = 0
+        for state in automaton.findall('state'):
+            number_states += 1
+
+        for transition in automaton.findall('transition'):
+            number_transitions += 1
+
+        print(f"{number_states},{number_transitions}")
+
+
         # --- Step 1: Identify all final states ---
         final_state_ids = set()
+        
         for state in automaton.findall('state'):
             state_id = state.get('id') # Get the 'id' attribute
             if state_id is None:
                 print(f"Warning: Skipping state element without an 'id' attribute.", file=sys.stderr)
                 continue
+
 
             # Check for a <label> sub-element with text 'final'
             label_element = state.find('label')
@@ -51,15 +65,15 @@ def parse_jff_mealy(filename):
 
         # --- Step 2: Process transitions and print output ---
 
-        # Print the updated header
-        print("state,symbol,next_state,output,is_final")
+        # print the principal header
+        print("state,symbol,num_outputs,outputs,next_state,next_state_is_final")
 
         # Find all transition elements and extract data
         for transition in automaton.findall('transition'):
             from_state = transition.find('from')
             to_state = transition.find('to')
             read_symbol = transition.find('read')
-            transout_output = transition.find('transout') # Output for Mealy
+            transout_output = transition.find('transout') # output for Mealy
 
             # Ensure all required elements are present within the transition
             if None in [from_state, to_state, read_symbol, transout_output]:
@@ -69,8 +83,11 @@ def parse_jff_mealy(filename):
             from_id = from_state.text
             to_id = to_state.text
             read_sym = read_symbol.text
+
             # Handle case where transout might be empty tag e.g. <transout/>
             trans_out = transout_output.text if transout_output.text is not None else ""
+            num_output = trans_out.count(',') + 1
+            trans_out = trans_out.replace(", ", " ")
 
             # Ensure essential text data is present (output can be empty)
             if None in [from_id, to_id, read_sym]:
@@ -81,7 +98,7 @@ def parse_jff_mealy(filename):
             is_final_value = 1 if to_id in final_state_ids else 0
 
             # Format and print the output line
-            print(f"{from_id},{read_sym},{to_id},{trans_out},{is_final_value}")
+            print(f"{from_id},{read_sym},{num_output},{trans_out},{to_id},{is_final_value}")
 
     except ET.ParseError as e:
         print(f"Error parsing XML file {filename}: {e}", file=sys.stderr)
