@@ -2,13 +2,13 @@
 
 ## Description
 
-This project implements a lexical analyzer (scanner) in C. It reads a source code file, processes it character by character, and groups sequences of characters into meaningful units called **tokens** (or lexemes).
+This project implements a lexical analyzer (scanner) in C. It reads a source code file, processes it character by character, and groups sequences of characters into tokens.
 
-The analyzer uses a Deterministic Finite Automaton (DFA) approach. The DFA's transition table is generated from a JFLAP (`.jff`) file using a Python script and stored in a CSV file (`../data/var.csv`). The C code then reads this CSV file to simulate the DFA and perform the lexical analysis on the input source code.
+The analyzer uses a Deterministic Finite Automaton (DFA). The DFA's transition table is generated from a JFLAP (`.jff`) file using a Python script and stored in a CSV file (`../data/var.csv`). The C code then reads this CSV to perform the lexical analysis on the input source code.
 
 ## Prerequisites
 
-To build and run this project, you will need:
+To build and run this project, make sure you have installed:
 
 *   **Make:** A build automation tool (usually pre-installed on Linux/macOS).
 *   **GCC:** The GNU Compiler Collection (or another compatible C compiler like Clang).
@@ -21,16 +21,10 @@ To build and run this project, you will need:
     git clone <your-repository-url>
     cd <repository-directory>
     ```
-2.  **(Optional but Recommended First Step): Generate the DFA data:**
-    The C code relies on the `../data/var.csv` file. Generate it from the JFLAP file using:
-    ```bash
-    make parse
-    ```
-    You typically only need to run this once, or whenever the `../state_machines/automata_compiler.jff` file is modified.
 
 ## Building the Project
 
-To compile and run the lexical analyzer, simply run `make` in the project's root directory:
+To compile and run the lexical analyzer, run `make run` with the flag FILE_PATH in the project's root directory:
 
 ```bash
 make run FILE_PATH=your_file_path
