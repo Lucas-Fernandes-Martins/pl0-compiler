@@ -1,7 +1,9 @@
-VAR END 1+1+ ger@ 2n 1@  fat;
+VAR END  ger@ 2n 1@;
+@
+12345
 BEGIN;
-	n := 4;;;;;;;;
+	n := 4;
 
 	:
-	{qq}1#7BEG7$:==-_088**IN@{@#@;7
+	{qq} :==-{
 END.

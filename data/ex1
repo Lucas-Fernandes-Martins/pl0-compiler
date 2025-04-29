@@ -1,12 +1,6 @@
-VAR@END n fat;
+VAR n fat;
 
-variavel
-
-1
-
-meu@identificador
-
-1idenficador
+{meu programa bem legal}
 
 BEGIN
 	n := 4;
