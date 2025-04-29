@@ -1,13 +1,6 @@
+iden1, identificador 
+iden2, identificador 
 VAR, VAR 
-@, <ERRO_CARACTERE_INVALIDO> 
-END, END 
-n, n 
-fat, fat 
-;, simb_ponto_virgula 
 BEGIN, BEGIN 
-n, n 
-:=, simb_atribuicao 
-4, 4 
-;, simb_ponto_virgula 
-END, END 
-., simb_ponto 
+var, identificador 
+IF, IF 

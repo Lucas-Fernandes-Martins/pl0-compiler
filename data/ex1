@@ -1,4 +1,13 @@
 VAR@END n fat;
+
+variavel
+
+1
+
+meu@identificador
+
+1idenficador
+
 BEGIN
 	n := 4;
 END.

@@ -16,7 +16,7 @@ static const char reserved_words[NUM_RESERVED_WORDS][MAX_RESERVED_WORD_LENGHT] =
  */
 int check_if_reserved_word(char *word){
 	for(int i = 0; i < NUM_RESERVED_WORDS; i++)
-		if(strcmp(word, reserved_words[i])) return 1;
+		if(!strcmp(word, reserved_words[i])) return 1;
 	
 	return 0;
 }
