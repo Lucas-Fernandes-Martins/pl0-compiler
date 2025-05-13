@@ -45,7 +45,10 @@ LexicalOutput lexical_analyser(FILE *input_file, Transition** transition_matrix)
 	// Loops while the char read is different from EOF
 	while((char_consumed = fgetc(input_file)) != EOF){
 		// Checks the transition corresponding to the current state and char
-		Transition current_transition = transition_matrix[current_state.number][char_consumed];
+		//if(char_consumed < 0){
+		//	char_consumed = 0;
+		//}
+		Transition current_transition = transition_matrix[current_state.number][(unsigned char) char_consumed];
 
 		// If the state is final, checks which case it belongs to
 		if(current_transition.next_state.is_final){

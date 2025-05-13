@@ -1,9 +1,11 @@
-VAR END  ger@ 2n 1@;
+VAR END  {ger@ 2n 1@;}
 @
 12345
 BEGIN;
-	n := 4;
+	n:=4;
 
 	:
 	{qq} :==-{
 END.
+
+

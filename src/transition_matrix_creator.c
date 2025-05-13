@@ -97,7 +97,7 @@ void apply_specific_rules(char *symbol, Transition new_transition, Transition* t
  * @param symbol plain text character string
  * @return string with the correspondig char
  */
-char* sanitize_token(char* symbol){
+char* sanitize_token(unsigned char* symbol){
 	if(!strcmp(symbol, "virgula"))
 		return ",";
 	else if(!strcmp(symbol, "tab"))
