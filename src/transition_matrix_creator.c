@@ -98,9 +98,11 @@ void apply_specific_rules(char *symbol, Transition new_transition, Transition* t
  * @return string with the correspondig char
  */
 char* sanitize_token(unsigned char* symbol){
-	if(!strcmp(symbol, "virgula"))
+	if(!strcmp(symbol, "virgula simb_virgula"))
+		return ", simb_virgula";
+	else if(!strcmp(symbol, "virgula")){
 		return ",";
-	else if(!strcmp(symbol, "tab"))
+	}else if(!strcmp(symbol, "tab"))
 		return "\t";
 	else if(!strcmp(symbol, "espaco"))
 		return " ";

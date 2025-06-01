@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "headers.h"
+
 
 // Sets the list of reserved words
 static const char reserved_words[NUM_RESERVED_WORDS][MAX_RESERVED_WORD_LENGHT] = {
@@ -36,64 +38,138 @@ LexicalOutput lexical_analyser(FILE *input_file, Transition** transition_matrix)
 	// Instantiates a standard output
 	LexicalOutput lexical_output;
 	lexical_output.end = 0;
+	lexical_output.token[0] = '\0'; // Initialize token string
+	lexical_output.class[0] = '\0'; // Initialize class string
 
 	// Instantiates input and output variables
 	char char_consumed;
 	char capture_output[MAX_TOKEN_LENGHT];
-	capture_output[0] = '\0';
+	capture_output[0] = '\0'; // Initialize capture_output string
 
 	// Loops while the char read is different from EOF
 	while((char_consumed = fgetc(input_file)) != EOF){
-		// Checks the transition corresponding to the current state and char
-		//if(char_consumed < 0){
-		//	char_consumed = 0;
-		//}
 		Transition current_transition = transition_matrix[current_state.number][(unsigned char) char_consumed];
 
-		// If the state is final, checks which case it belongs to
 		if(current_transition.next_state.is_final){
 			switch(current_transition.num_outputs){
-				case 1: // If the transition to this state outputs only its class (Ex:"identificador"/"number")
-					// If the identifier read is a reserved word, its class is updated
-					if(check_if_reserved_word(capture_output)) strcpy(lexical_output.class, capture_output);
-					// Otherwise, takes the class given by the output
-					else strcpy(lexical_output.class, current_transition.output);
+				case 1: // Outputs only its class (e.g., "identificador", "numero")
+					// capture_output should contain the accumulated token string
+					if(check_if_reserved_word(capture_output)) {
+						strcpy(lexical_output.class, capture_output);
+					} else {
+						// Ensure current_transition.output is not null before copying
+						if (current_transition.output) {
+							strcpy(lexical_output.class, current_transition.output);
+						} else {
+							lexical_output.class[0] = '\0'; // Safety: if output is NULL
+						}
+					}
+					strcpy(lexical_output.token, capture_output);
 					break;
-				case 2: // If the transition to this state outputs its token and class (Ex:"+ simb_mais")
-					// Copies the current transition's output
-					char *class = strdup(current_transition.output);
-					// Stores the token part in "char* token" and class part in "char* class"
-					char* token = strsep(&class, " ");
-					// Appends the token to the current output token string
-					strcat(capture_output, token);
-					// Copies the class to the output class
-					strcpy(lexical_output.class, class);
-					free(token);
+				case 2: // Outputs token and class (e.g., "+ simb_mais")
+					{
+						// Ensure current_transition.output is not null before strdup
+						if (current_transition.output) {
+							char *original_fsm_output_dup = strdup(current_transition.output);
+							if (!original_fsm_output_dup) { perror("strdup failed in lexer case 2"); exit(EXIT_FAILURE); }
+							char *temp_ptr_for_strsep = original_fsm_output_dup;
+							char* token_part = strsep(&temp_ptr_for_strsep, " ");
+							char* class_part = temp_ptr_for_strsep; // Remainder is the class
+
+							if (token_part) {
+								strcat(capture_output, token_part);
+							}
+							if (class_part) {
+								strcpy(lexical_output.class, class_part);
+							} else {
+								lexical_output.class[0] = '\0'; // Ensure class is empty if not found
+							}
+							strcpy(lexical_output.token, capture_output);
+							free(original_fsm_output_dup); // Free the string allocated by strdup
+						} else {
+							// Handle NULL current_transition.output for case 2 if necessary
+							lexical_output.token[0] = '\0';
+							lexical_output.class[0] = '\0';
+						}
+					}
 					break;
 				default:
-					printf("None or excessive number of outputs in Mealy machine!\n");
 					exit(-1);
 			}
-			// Copies the token output string to the output struct
-			strcpy(lexical_output.token, capture_output);
 
-			// Backtracks if the current transition demands a backtrack
-			if(current_transition.lookahead) fseek(input_file, -1, SEEK_CUR);
+			if(current_transition.lookahead) {
+				fseek(input_file, -1, SEEK_CUR);
+			}
 
-			// Output
+            //caso seja um caracter de espaço ou quebra de linha, ignora
+            if (lexical_output.token[0] == '\0' && lexical_output.class[0] == '\0') {
+                current_state.number = 0; // Reset to initial state
+                current_state.is_final = 0;
+                capture_output[0] = '\0';   // Clear accumulated capture
+                lexical_output.token[0] = '\0'; // Ensure lexical_output is clean for this skipped iteration
+                lexical_output.class[0] = '\0';
+                // The character that led to this empty token is consumed.
+                // The 'continue' will fetch the next character.
+                continue; 
+            }
+
 			return lexical_output;
-		} 
-		else{
-			// If the state is not final, appends its output to the current output token string
-			strcat(capture_output, current_transition.output);
 		}
-
-		// Transitions to the next state
-		current_state = current_transition.next_state;
+		else{
+			// If the state is not final, append its output to the current output token string
+			if (current_transition.output != NULL && strcmp(current_transition.output, "lambda") != 0 && strcmp(current_transition.output, "\0") != 0) {
+                 strcat(capture_output, current_transition.output);
+            }
+		}
+		current_state = current_transition.next_state; // Corrected assignment
 	}
 
 	lexical_output.end = 1;
+	// If EOF is reached and capture_output has content, it might be the last token.
+	// This logic might need to be adjusted based on FSM design for EOF.
+	if (capture_output[0] != '\0' && lexical_output.token[0] == '\0') {
+	    // This is a guess; FSM should ideally define how EOF finalizes tokens.
+	    // Assuming the class should be 'identificador' or 'numero' if not reserved.
+	    // This part is speculative and depends heavily on your FSM's design for EOF.
+	    if(check_if_reserved_word(capture_output)) {
+			strcpy(lexical_output.class, capture_output);
+		} else {
+		    // Heuristic: if it looks like a number, class is numero, else identificador
+		    // This is a simplification. Your FSM should define this.
+		    bool is_num = true;
+		    for (int i = 0; capture_output[i] != '\0'; i++) {
+		        if (!isdigit(capture_output[i])) {
+		            is_num = false; break;
+		        }
+		    }
+		    if (is_num && capture_output[0] != '\0') strcpy(lexical_output.class, "numero");
+		    else strcpy(lexical_output.class, "identificador"); // Default/fallback
+		}
+		strcpy(lexical_output.token, capture_output);
+	}
 	return lexical_output;
+}
+
+/**
+ * @brief Returns a token to the input file stream by seeking back.
+ * @param input_file The file stream to return the token to.
+ * @param returned_token The lexical output (token) to be "unread".
+ */
+void return_token(FILE *input_file, LexicalOutput returned_token){
+    if (returned_token.token[0] != '\0') { // Only return if it's a valid token
+        long offset = strlen(returned_token.token);
+        long current_pos = ftell(input_file);
+
+        if (offset > current_pos) {
+            fprintf(stderr, "Warning: Attempted to return token '%s' (length %ld) when file pointer is at %ld. Token not returned to prevent seeking before file start.\n", returned_token.token, offset, current_pos);
+            return; // Prevent the erroneous seek
+        }
+
+        if (fseek(input_file, -offset, SEEK_CUR) != 0) {
+            perror("Error seeking back in file");
+            // Handle error appropriately, maybe exit or set an error flag
+        }
+    }
 }
 
 /**
@@ -174,13 +250,32 @@ void main(int argc, char** argv){
 		exit(1);
 	}
 
+	HashNode* hashTable[HASH_SIZE];
+
 	// Defines the input as the name of the input file
 	char *input_file_name = argv[1];
 	// Defines the automata transition table's file path
 	char automata_path[] = "./data/transition_matrix.csv";
+
+	printf("\n========== Loading table! ========= \n\n");
+	memset(hashTable, 0, sizeof(hashTable));
+
+    // Insert FIRST and FOLLOW sets into the hash table
+    insert_first_follow(hashTable);
 	
-	printf("\n========== STARTING LEXICAL ANALYSIS! ========= \n\n");
+	printf("\n========== STARTING ANALYSIS! ========= \n\n");
+
+	Transition **transition_matrix = csv_parser(automata_path);
+
+	FILE *input_file;
+	input_file = fopen(input_file_name, "r");
+	if(input_file == NULL){
+		printf("Error: Unable to open input file!\n");
+		exit(1);
+	}
 
 	// Starts syntatic analysis
 	syntatic_analyser(input_file_name, automata_path);
+	FirstFollowSet *data = hash_get(hashTable, "<variavel>");
+	variavel(input_file, transition_matrix, *data);
 }

@@ -1,64 +1,5 @@
 VAR, VAR 
-x, identificador 
-virgula, simb_virgula 
-y, identificador 
-;, simb_ponto_virgula 
-, <ERRO_CARACTERE_INVALIDO> 
-, <ERRO_CARACTERE_INVALIDO> 
-, <ERRO_CARACTERE_INVALIDO> 
-PROCEDURE, PROCEDURE 
-som, identificador 
-@, <ERRO_CARACTERE_INVALIDO> 
-;, simb_ponto_virgula 
-, <ERRO_CARACTERE_INVALIDO> 
-VAR, VAR 
 a, identificador 
-virgula, simb_virgula 
+,, simb_virgula 
 b, identificador 
-virgula, simb_virgula 
-c, identificador 
 ;, simb_ponto_virgula 
-, <ERRO_CARACTERE_INVALIDO> 
-BEGIN, BEGIN 
-, <ERRO_CARACTERE_INVALIDO> 
-a, identificador 
-:=, simb_atribuicao 
-x, identificador 
-;, simb_ponto_virgula 
-, <ERRO_CARACTERE_INVALIDO> 
-b, identificador 
-:=, simb_atribuicao 
-y, identificador 
-;, simb_ponto_virgula 
-, <ERRO_CARACTERE_INVALIDO> 
-c, identificador 
-:=, simb_atribuicao 
-a, identificador 
-+, simb_mais 
-b, identificador 
-, <ERRO_CARACTERE_INVALIDO> 
-END, END 
-;, simb_ponto_virgula 
-, <ERRO_CARACTERE_INVALIDO> 
-, <ERRO_CARACTERE_INVALIDO> 
-BEGIN, BEGIN 
-, <ERRO_CARACTERE_INVALIDO> 
-x, identificador 
-=, simb_igual 
-2, numero 
-., simb_ponto 
-3, numero 
-;, simb_ponto_virgula 
-, <ERRO_CARACTERE_INVALIDO> 
-y, identificador 
-=, simb_igual 
-3, numero 
-;, simb_ponto_virgula 
-, <ERRO_CARACTERE_INVALIDO> 
-CALL, CALL 
-soma, identificador 
-, <ERRO_CARACTERE_INVALIDO> 
-END, END 
-., simb_ponto 
-, <ERRO_CARACTERE_INVALIDO> 
-, <ERRO_CARACTERE_INVALIDO> 
