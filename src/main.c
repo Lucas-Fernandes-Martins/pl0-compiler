@@ -275,7 +275,7 @@ void main(int argc, char** argv){
 	}
 
 	// Starts syntatic analysis
-	syntatic_analyser(input_file_name, automata_path);
+	//syntatic_analyser(input_file_name, automata_path);
 	FirstFollowSet *data = hash_get(hashTable, "<variavel>");
-	variavel(input_file, transition_matrix, *data);
+	variavel(input_file, transition_matrix, *data, hashTable);
 }

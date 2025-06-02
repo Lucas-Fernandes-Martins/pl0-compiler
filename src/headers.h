@@ -81,6 +81,6 @@ void return_token(FILE *input_file, LexicalOutput returned_token); // New functi
 void free_memory(Transition** transition_matrix);
 
 // Syntatic Analysis
-void variavel(FILE *input_file, Transition** transition_matrix, FirstFollowSet data);
+void variavel(FILE *input_file, Transition** transition_matrix, FirstFollowSet data, HashNode* hashTable[]);
 
-void mais_var(FILE *input_file, Transition** transition_matrix, FirstFollowSet data);
+void mais_var(FILE *input_file, Transition** transition_matrix, FirstFollowSet data, HashNode* hashTable[]);

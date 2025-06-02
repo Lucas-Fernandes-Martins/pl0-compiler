@@ -8,7 +8,6 @@ all:
 
 message:
 	echo output saved to 'output.txt':
-	cat output.txt
 
 run_analyser: all
 	./main  $(FILE_PATH)

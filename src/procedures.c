@@ -40,55 +40,80 @@ int is_in_follow_set(FirstFollowSet data, const char *symbol) {
     return 0; // Symbol not found in follow set
 }
 
-void variavel(FILE *input_file, Transition** transition_matrix, FirstFollowSet data) {
+int is_in_first_set(FirstFollowSet data, const char *symbol) {
+    for (int i = 0; i < data.firstCount; i++) {
+        if (strcmp(data.first[i], symbol) == 0) {
+            return 1; // Symbol found in follow set
+        }
+    }
+    return 0; // Symbol not found in follow set
+}
+
+void variavel(FILE *input_file, Transition** transition_matrix, FirstFollowSet data, HashNode* hashTable[]) {
     LexicalOutput lexical_output = lexical_analyser(input_file, transition_matrix);
 
     if(strcmp(lexical_output.token, "VAR")){
         printf("Error: Expected 'VAR' but found '%s'\n", lexical_output.token);
         //inserir funcao de modo panico
     }else{
-        printf("found: %s\n", lexical_output.token);
-        printf("class: %s\n", lexical_output.class);
         lexical_output = lexical_analyser(input_file, transition_matrix);
-        printf("found: %s\n", lexical_output.token);
-        printf("class: %s\n", lexical_output.class);
         if(strcmp(lexical_output.class, "identificador")){
             printf("Error: Expected identifier but found '%s' ' '  \n", lexical_output.token);
             //inserir funcao de modo panico
         }else{
             lexical_output = lexical_analyser(input_file, transition_matrix);
             if(!strcmp(lexical_output.token, ";")){
-                printf("Declaracao de variaveis identificada! \n");
-                //inserir funcao de modo panico
-            }else if(!strcmp(lexical_output.token, ",")){
+                printf("Declaracao de variaveis identificada! \n");                
+            //}else if(!strcmp(lexical_output.token, ",")){
+            }else if(is_in_first_set(*hash_get(hashTable, "<mais_var>"), lexical_output.token)){
                 return_token(input_file, lexical_output);
                 // adicionar ; a lista de seguidores
                 FirstFollowSet new_data = add_follow(data, ";");
-                mais_var(input_file, transition_matrix, new_data);            
+                printf("Chamando recursao! \n");
+                mais_var(input_file, transition_matrix, new_data, hashTable);         
             }else{
                 printf("Error: Expected ';' or ',' but found '%s'\n", lexical_output.token);
                 //inserir funcao de modo panico
             }    
         }
+        printf("Declaracao de variaveis identificada \n");
+
     }
 }
 
-void programa(FILE *input_file, Transition** transition_matrix, FirstFollowSet data){
+void programa(FILE *input_file, Transition** transition_matrix, FirstFollowSet data, HashNode* hashTable[]) {
+    LexicalOutput lexical_output = lexical_analyser(input_file, transition_matrix);
+
+    if(strcmp(lexical_output.token, "PROGRAM")){
+        printf("Error: Expected 'PROGRAM' but found '%s'\n", lexical_output.token);
+        //inserir funcao de modo panico
+    }else{
+        lexical_output = lexical_analyser(input_file, transition_matrix);
+        if(strcmp(lexical_output.class, "identificador")){
+            printf("Error: Expected identifier but found '%s'\n", lexical_output.token);
+            //inserir funcao de modo panico
+        }else{
+            lexical_output = lexical_analyser(input_file, transition_matrix);
+            if(!strcmp(lexical_output.token, ";")){
+                printf("Programa identificado! \n");
+                variavel(input_file, transition_matrix, data, hashTable);
+            }else{
+                printf("Error: Expected ';' but found '%s'\n", lexical_output.token);
+                //inserir funcao de modo panico
+            }
+        }
+    }
     
 }
 
-void mais_var(FILE *input_file, Transition** transition_matrix, FirstFollowSet data){
+void mais_var(FILE *input_file, Transition** transition_matrix, FirstFollowSet data, HashNode* hashTable[]) {
     LexicalOutput lexical_output = get_token(input_file, transition_matrix);
 
     if(strcmp(lexical_output.token, ",")){
         printf("Error: Expected ',' but found '%s'\n", lexical_output.token);
         //inserir funcao de modo panico
     }else{
-        printf("found: %s\n", lexical_output.token);
-        printf("class: %s\n", lexical_output.class);
         lexical_output = lexical_analyser(input_file, transition_matrix);
-        printf("found: %s\n", lexical_output.token);
-        printf("class: %s\n", lexical_output.class);
         if(strcmp(lexical_output.class, "identificador")){
             printf("Error: Expected identifier but found '%s'\n", lexical_output.token);
             //inserir funcao de modo panico
@@ -97,7 +122,8 @@ void mais_var(FILE *input_file, Transition** transition_matrix, FirstFollowSet d
 
             if(!strcmp(lexical_output.token, ",")){
                 return_token(input_file, lexical_output);
-                mais_var(input_file, transition_matrix, data);
+                printf("Chamando recursao! \n");
+                mais_var(input_file, transition_matrix, data, hashTable);
             }
 
             if(is_in_follow_set(data, lexical_output.token)){
