@@ -4,6 +4,7 @@
 
 #include "hash_table.h"
 
+//Calculate hash key based on the input string
 unsigned int hash_function(const char *str){
     // We're using djb2 (Daniel J. Bernstein) hash function to calculate the hash key
     unsigned int hash = 5381;
@@ -15,6 +16,7 @@ unsigned int hash_function(const char *str){
     return hash % TABLE_SIZE;    
 }
 
+//Create a new hash table
 HashTable *hash_create(){
     HashTable *hash_table = malloc(sizeof(HashTable));
     if(hash_table == NULL) return NULL;
@@ -28,6 +30,7 @@ HashTable *hash_create(){
     return hash_table;
 }
 
+//Insert a new symbol into the hash table
 int hash_insert(HashTable *hash_table, const char *symbol, SymbolInfo symbol_info){
     if(symbol == NULL) return 0;
 
@@ -56,7 +59,7 @@ int hash_insert(HashTable *hash_table, const char *symbol, SymbolInfo symbol_inf
     return 1;
 }
 
-
+//Retrieve symbol information from the hash table
 SymbolInfo *hash_get(HashTable *hash_table, const char *symbol){
     if((symbol == NULL) || (hash_table == NULL)) return NULL;
 
@@ -73,7 +76,7 @@ SymbolInfo *hash_get(HashTable *hash_table, const char *symbol){
     return NULL; // Not found
 }
 
-
+//Destroy hash table, freeing all allocated memory
 void hash_destroy(HashTable *hash_table){
     if(hash_table == NULL) return; // Hash is already empty
 

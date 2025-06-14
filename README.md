@@ -12,7 +12,6 @@ To build and run this project, make sure you have installed:
 
 *   **Make:** A build automation tool (usually pre-installed on Linux/macOS).
 *   **GCC:** The GNU Compiler Collection (or another compatible C compiler like Clang).
-*   **Python 3:** Required to run the `parser.py` script which generates the DFA data.
 
 ## Setup
 
@@ -27,14 +26,14 @@ To build and run this project, make sure you have installed:
 To compile and run the lexical analyzer, run `make run` with the flag FILE_PATH in the project's root directory:
 
 ```bash
-make run FILE_PATH=your_file_path
+make
 
 ```
 
 Files ./data/ex1, ./data/ex2 are offered as examples
 
 ```bash
-make run FILE_PATH=./data/ex1
+./compiler INPUT_FILE_NAME
 
 
 

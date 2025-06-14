@@ -5,6 +5,7 @@
 
 #include "transition_table.h"
 
+//Initializes a new transition matrix
 Transition **create_transition_matrix(int number_states){
     // Create and allocate memory for the transition matrix
 	Transition** transition_matrix = malloc(number_states * sizeof(Transition *));
@@ -27,6 +28,7 @@ Transition **create_transition_matrix(int number_states){
     return transition_matrix;
 }
 
+//Adds transition to transition matrix
 void add_transition(Transition **matrix, int from_state, int input_char, const char *output, int lookahead, State next_state){
     if (from_state < 0 || input_char >= ASCII_EXTENDED_SIZE) return;
 

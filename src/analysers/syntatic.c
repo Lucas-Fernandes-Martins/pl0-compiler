@@ -8,6 +8,8 @@
 Token current_token;
 static HashTable *first_follow_table;
 
+
+//Prints syntathical error message
 void print_syntatical_error(char **expected_types, int num_expected){
 	printf("Syntatic error on line %d: found '%s', expected {", current_token.line, current_token.lexeme);
 	for(int i = 0; i < num_expected - 1; i++) printf("'%s', ", type_to_lexeme(expected_types[i]));
@@ -16,6 +18,7 @@ void print_syntatical_error(char **expected_types, int num_expected){
 	return;
 }
 
+//Panic mode implementation
 void handle_error(FILE *input_file, StringSet follow_set, char **expected_types, int num_expected){
 	if(strcmp(current_token.type, "EOF") == 0) exit(1);
 
@@ -88,6 +91,7 @@ void programa(FILE *input_file){
 	}
 }
 
+//Procedimento block
 void bloco(FILE *input_file, StringSet parent_follow_set){
 	StringSet follow_set;
 
@@ -100,6 +104,7 @@ void bloco(FILE *input_file, StringSet parent_follow_set){
 	comando(input_file, follow_set);
 }
 
+//Procedimento declaracao
 void declaracao(FILE *input_file, StringSet parent_follow_set){
 	StringSet follow_set;
 
@@ -116,6 +121,8 @@ void declaracao(FILE *input_file, StringSet parent_follow_set){
     procedimento(input_file, follow_set);
 }
 
+
+//Procedimento constante
 void constante(FILE *input_file, StringSet parent_follow_set){
 	StringSet follow_set;
 
@@ -181,6 +188,8 @@ void constante(FILE *input_file, StringSet parent_follow_set){
 	}
 }		
 
+
+//Procedimento mais_const
 void mais_const(FILE *input_file, StringSet parent_follow_set){
 	StringSet follow_set;
 
@@ -231,6 +240,8 @@ void mais_const(FILE *input_file, StringSet parent_follow_set){
 	mais_const(input_file, follow_set);
 }
 
+
+//Procedimento variavel
 void variavel(FILE *input_file, StringSet parent_follow_set){
 	StringSet follow_set;
 
@@ -270,6 +281,7 @@ void variavel(FILE *input_file, StringSet parent_follow_set){
 	return;
 }
 
+//Procedimento mais_var
 void mais_var(FILE *input_file, StringSet parent_follow_set){
 	StringSet follow_set;
 
@@ -296,6 +308,7 @@ void mais_var(FILE *input_file, StringSet parent_follow_set){
 	mais_var(input_file, follow_set);
 }
 
+//Procedimento procedimento
 void procedimento(FILE *input_file, StringSet parent_follow_set){
 	StringSet follow_set;
 
@@ -348,6 +361,8 @@ void procedimento(FILE *input_file, StringSet parent_follow_set){
 	procedimento(input_file, follow_set);
 }
 
+
+//Procedimento comando
 void comando(FILE *input_file, StringSet parent_follow_set){
 	StringSet follow_set;
 
@@ -458,6 +473,8 @@ void comando(FILE *input_file, StringSet parent_follow_set){
 	return;
 }
 
+
+//Procedimento mais_cmd
 void mais_cmd(FILE *input_file, StringSet parent_follow_set){
 	StringSet follow_set;
 
@@ -481,6 +498,8 @@ void mais_cmd(FILE *input_file, StringSet parent_follow_set){
 	mais_cmd(input_file, follow_set);
 }
 
+
+//Procedimento expressao
 void expressao(FILE *input_file, StringSet parent_follow_set){
 	StringSet follow_set;
 
@@ -497,6 +516,7 @@ void expressao(FILE *input_file, StringSet parent_follow_set){
 	mais_termos(input_file, follow_set);
 }
 
+//Procedimento operador_unario
 void operador_unario(FILE *input_file){
 	// Checks if token's type is "simb_menos"
 	if(strcmp(current_token.type, "simb_menos") == 0){
@@ -513,6 +533,8 @@ void operador_unario(FILE *input_file){
 	return;
 }
 
+
+//Procedimento termo
 void termo(FILE *input_file, StringSet parent_follow_set){
 	StringSet follow_set;
 
@@ -557,6 +579,8 @@ void mais_termos(FILE *input_file, StringSet parent_follow_set){
 	}
 }
 
+
+//Procedimento fator
 void fator(FILE *input_file, StringSet parent_follow_set){
 	StringSet follow_set;
 
@@ -592,6 +616,8 @@ void fator(FILE *input_file, StringSet parent_follow_set){
 	return;
 }
 
+
+//Procedimento mais_fatores
 void mais_fatores(FILE *input_file, StringSet parent_follow_set){
 	StringSet follow_set;
 
@@ -623,6 +649,7 @@ void mais_fatores(FILE *input_file, StringSet parent_follow_set){
 	}
 }
 
+//Procedimento condicao
 void condicao(FILE *input_file, StringSet parent_follow_set){
 	StringSet follow_set;
 
@@ -651,6 +678,8 @@ void condicao(FILE *input_file, StringSet parent_follow_set){
 	return;
 }
 
+
+//Procedimento relacional
 void relacional(FILE *input_file, StringSet parent_follow_set){
 	StringSet follow_set;
 	
